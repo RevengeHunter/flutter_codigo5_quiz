@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_codigo5_quiz/quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,21 +26,37 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPage extends State<QuizPage> {
 
-  List<String> preguntas = [
-    "El hombre llego a la luna",
-    "La tierra es plana",
-    "Desayunaron",
-  ];
-
-  List<bool> answers = [
-    true,
-    false,
-    true,
-  ];
+  QuizBrain quizBrain = QuizBrain();
 
   List<Icon> scoreKeeper = [];
 
-  int idQuestionNumber = 0;
+  checkAnswer(bool userAnswer){
+    if(quizBrain.isFinished()==false){
+      bool correctAnswer = quizBrain.getQuestionAnswer();
+      if (correctAnswer == userAnswer)
+        scoreKeeper.add(
+          Icon(
+            Icons.check,
+            color: Color(0xff00E1B7),
+          ),
+        );
+      else
+        scoreKeeper.add(
+          Icon(
+            Icons.close,
+            color: Color(0xfff84073),
+          ),
+        );
+
+      setState(() {});
+      quizBrain.nextQuestion();
+    }else{
+      Alert(context: context, title: "¡Gracias!", desc: "Se completo el cuestionario").show();
+      quizBrain.restart();
+      scoreKeeper.clear();
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +76,7 @@ class _QuizPage extends State<QuizPage> {
             flex: 5,
             child: Center(
               child: Text(
-                preguntas[idQuestionNumber],
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24.0,
@@ -76,16 +94,7 @@ class _QuizPage extends State<QuizPage> {
                   "Verdadero",
                 ),
                 onPressed: () {
-                  bool correctAnswer = answers[idQuestionNumber];
-                  if(correctAnswer) scoreKeeper.add(Icon(Icons.check,color: Color(0xff00E1B7),),);
-                  else scoreKeeper.add(Icon(Icons.close,color: Color(0xfff84073),),);
-
-                  if(idQuestionNumber<preguntas.length-1){
-                    idQuestionNumber++;
-                  }else if(idQuestionNumber==preguntas.length-1){
-                    idQuestionNumber=0;
-                  }
-                  setState(() {});
+                  checkAnswer(true);
                 },
               ),
             ),
@@ -99,21 +108,14 @@ class _QuizPage extends State<QuizPage> {
                   "Falso",
                 ),
                 onPressed: () {
-                  bool correctAnswer = answers[idQuestionNumber];
-                  if(!correctAnswer) scoreKeeper.add(Icon(Icons.check,color: Color(0xff00E1B7),),);
-                  else scoreKeeper.add(Icon(Icons.close,color: Color(0xfff84073),),);
-
-                  if(idQuestionNumber<preguntas.length-1){
-                    idQuestionNumber++;
-                  }else if(idQuestionNumber==preguntas.length-1){
-                    idQuestionNumber=0;
-                  }
-                  setState(() {});
+                  checkAnswer(false);
                 },
               ),
             ),
           ),
-          Row(children: scoreKeeper,)
+          Row(
+            children: scoreKeeper,
+          )
         ],
       ),
     );
